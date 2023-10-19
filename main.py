@@ -79,31 +79,84 @@ def dfs(start):
                 parent[neighbour] = curr
 
 
-def Astar(start):
+def Astar(initialState):
     pq = []  # frontier(priority queue)
     parent = dict()
+    dist = dict()
     explored = set()
-    heapq.heappush(pq, (start, 0))
-    parent.update({start, (start, 0)})
-    while not pq:
-        cost, curr = heapq.heappop(pq)
+    heapq.heappush(pq, (initialState, 0))
+    parent[initialState] = (initialState, 0)
+    dist[initialState] = 0
+    while len(pq) > 0:
+        curr, cost = heapq.heappop(pq)
         if curr in explored:
             continue
         explored.add(curr)
         if curr == goal:  # success
-            return 1
-        for neighbor, edge_cost in get_neighbor(curr):
+            return parent
+        for neighbor in get_neighbor(curr):
+            new_cost = 1 + cost
             if neighbor not in parent:
-                new_cost = cost + edge_cost
                 parent[neighbor] = (curr, new_cost)
                 heapq.heappush(pq, (neighbor, new_cost))
-            if neighbor in pq:
-                old_cost = pq
-                modified_cost = cost + edge_cost
-                if modified_cost < old_cost:
-                    parent[neighbor] = (curr, modified_cost)
-                    heapq.heappush(pq, (neighbor, modified_cost))
-    return 0  # failed
+                dist[neighbor] = new_cost
+            if neighbor in pq and new_cost < dist[neighbor]:
+                parent[neighbor] = (curr, new_cost)
+                heapq.heappush(pq, (neighbor, new_cost))
+                dist[neighbor] = new_cost
+    # failed
+
+
+def heuristic(state):
+    sum = 0
+    for i in range(len(state)):
+        x_ind = (i // 3)
+        y_ind = (i % 3)
+        if state[i] == ' ':
+            sum = sum + abs(0 - x_ind) + abs(0 - y_ind)
+        elif state[i] == '1':
+            sum = sum + abs(0 - x_ind) + abs(1 - y_ind)
+        elif state[i] == '2':
+            sum = sum + abs(0 - x_ind) + abs(2 - y_ind)
+        elif state[i] == '3':
+            sum = sum + abs(1 - x_ind) + abs(0 - y_ind)
+        elif state[i] == '4':
+            sum = sum + abs(1 - x_ind) + abs(1 - y_ind)
+        elif state[i] == '5':
+            sum = sum + abs(1 - x_ind) + abs(2 - y_ind)
+        elif state[i] == '6':
+            sum = sum + abs(2 - x_ind) + abs(0 - y_ind)
+        elif state[i] == '7':
+            sum = sum + abs(2 - x_ind) + abs(1 - y_ind)
+        else:
+            sum = sum + abs(2 - x_ind) + abs(2 - y_ind)
+    return sum
+
+
+def heuristic_euclidean(state):
+    sum = 0
+    for i in range(len(state)):
+        x_ind = (i // 3)
+        y_ind = (i % 3)
+        if state[i] == ' ':
+            sum = sum + ((0 - x_ind) ** 2 + (0 - y_ind) ** 2)
+        elif state[i] == '1':
+            sum = sum + ((0 - x_ind) ** 2 + (1 - y_ind) ** 2)
+        elif state[i] == '2':
+            sum = sum + ((0 - x_ind) ** 2 + (2 - y_ind) ** 2)
+        elif state[i] == '3':
+            sum = sum + ((1 - x_ind) ** 2 + (0 - y_ind) ** 2)
+        elif state[i] == '4':
+            sum = sum + ((1 - x_ind) ** 2 + (1 - y_ind) ** 2)
+        elif state[i] == '5':
+            sum = sum + ((1 - x_ind) ** 2 + (2 - y_ind) ** 2)
+        elif state[i] == '6':
+            sum = sum + ((2 - x_ind) ** 2 + (0 - y_ind) ** 2)
+        elif state[i] == '7':
+            sum = sum + ((2 - x_ind) ** 2 + (1 - y_ind) ** 2)
+        else:
+            sum = sum + ((2 - x_ind) ** 2 + (2 - y_ind) ** 2)
+    return sum
 
 
 def main():
