@@ -133,6 +133,7 @@ def heuristic(state):
     return sum
 
 
+
 def heuristic_euclidean(state):
     sum = 0
     for i in range(len(state)):
