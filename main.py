@@ -1,7 +1,17 @@
 import heapq
+import time
 from collections import deque
 
 goal = "012345678"
+
+
+def is_solvable(state):
+    inv = 0
+    for i in range(8):
+        for j in range(i + 1, 9):
+            if state[j] != '0' and state[i] != '0' and state[i] > state[j]:
+                inv = inv + 1
+    return inv % 2 == 0
 
 
 def get_path(parent):
@@ -36,9 +46,9 @@ def get_neighbor(state):
 
 
 def bfs(start):
-    parent = dict()
-    explored = set()
     frontier = deque()
+    explored = set()
+    parent = dict()
     frontier.append(start)
     parent[start] = start
     while len(frontier) > 0:
@@ -50,16 +60,14 @@ def bfs(start):
             if neighbour not in parent:
                 frontier.append(neighbour)
                 parent[neighbour] = curr
-    return parent
 
 
-def dfs(initial_state):
-    parent = dict()
+def dfs(start):
+    frontier = deque()
     explored = set()
-    frontier = deque()  # empty stack
-    frontier.append(initial_state)
-    parent[initial_state] = initial_state
-
+    parent = dict()
+    frontier.append(start)
+    parent[start] = start
     while len(frontier) > 0:
         curr = frontier.pop()
         explored.add(curr)
@@ -67,40 +75,50 @@ def dfs(initial_state):
             return parent
         for neighbour in get_neighbor(curr):
             if neighbour not in parent:
-                parent[neighbour] = curr
                 frontier.append(neighbour)
-    return 0
+                parent[neighbour] = curr
+
+
+def Astar(start):
+    pq = []  # frontier(priority queue)
+    parent = dict()
+    explored = set()
+    heapq.heappush(pq, (start, 0))
+    parent.update({start, (start, 0)})
+    while not pq:
+        cost, curr = heapq.heappop(pq)
+        if curr in explored:
+            continue
+        explored.add(curr)
+        if curr == goal:  # success
+            return 1
+        for neighbor, edge_cost in get_neighbor(curr):
+            if neighbor not in parent:
+                new_cost = cost + edge_cost
+                parent[neighbor] = (curr, new_cost)
+                heapq.heappush(pq, (neighbor, new_cost))
+            if neighbor in pq:
+                old_cost = pq
+                modified_cost = cost + edge_cost
+                if modified_cost < old_cost:
+                    parent[neighbor] = (curr, modified_cost)
+                    heapq.heappush(pq, (neighbor, modified_cost))
+    return 0  # failed
+
+
+def main():
+    start = "125340678"
+    if not is_solvable(start):
+        print("Non Solvable")
+        return
+    start_time = time.time()
+    ans = bfs(start)
+    end_time = time.time()
+    exec_time = end_time - start_time
+    print("Finished in:", round(exec_time * 1e3, 4), "ms")
+    trace = get_path(ans)
+    print(trace[-1::-1])
 
 
 if __name__ == "__main__":
-    st = "125340678"
-    ans = bfs(st)
-    trace = get_path(ans, st)
-    for i in range(len(trace) - 1, -1, -1):
-        print(trace[i])
-
-# def Astar(initialState, goal):
-#     pq = []  # frontier(priority queue)
-#     parent = dict()
-#     explored = set()
-#     heapq.heappush(pq, (initialState, 0))
-#     parent.update({initialState, (initialState, 0)})
-#     while not pq:
-#         cost, curr = heapq.heappop(pq)
-#         if curr in explored:
-#             continue
-#         explored.add(curr)
-#         if curr == goal:  # success
-#             return 1
-#         for neighbor,edge_cost in get_neighbor(curr):
-#             if neighbor not in parent:
-#                 new_cost=cost+edge_cost
-#                 parent[neighbor] = (curr, new_cost)
-#                 heapq.heappush(pq,(neighbor,new_cost))
-#             if neighbor in pq:
-#                 old_cost=pq
-#                 modified_cost = cost+edge_cost
-#                 if modified_cost<old_cost:
-#                     parent[neighbor] = (curr, modified_cost)
-#                     heapq.heappush(pq,(neighbor,modified_cost))
-#     return 0  #failed
+    main()
