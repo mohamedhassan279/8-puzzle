@@ -6,7 +6,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
 import main
-
+from GUI.solution import StepDisplayWindow
 
 
 class PuzzleApp(QWidget):
@@ -29,9 +29,10 @@ class PuzzleApp(QWidget):
         self.table_widget.verticalHeader().setVisible(False)
         self.table_widget.horizontalHeader().setVisible(False)
         self.table_widget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.table_widget.verticalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.table_widget.setSelectionMode(QAbstractItemView.NoSelection)
 
-        background_image = QPixmap("wooden.jpg")
+        background_image = QPixmap("GUI/image.jpg")
 
         widget_width = 800
         widget_height = 600
@@ -54,9 +55,10 @@ class PuzzleApp(QWidget):
         self.table_widget.setPalette(palette)
 
         # Increase cell border width using a custom stylesheet
-        self.table_widget.setStyleSheet("QTableWidget::item { border: 1px solid brown; }")
+        self.table_widget.setStyleSheet("QTableWidget { border: 2 solid; }")
         font = QFont()
-        font.setPointSize(20)  # Adjust the font size as needed
+        font.setPointSize(20)
+        font.setBold(True)
         self.table_widget.setFont(font)
 
         for row in range(3):
@@ -100,111 +102,15 @@ class PuzzleApp(QWidget):
         self.table_widget.setStyleSheet("""
                     QTableWidget::item {
                         background-color: transparent;
-                        color: #000000; /* Set the text color to black */
-                        font: 16px;
-                        text-align: center
+                        color: #754302;
+                        border: 1.2 solid #a64f08;
                     }
                     QTableWidget::item:hover {
-                        background-color: #e39271;
+                        background-color: #d99843;
                     }
                 """)
 
-    def custom_resize_event(self, event):
-        self.update_row_heights()
-        super(PuzzleApp, self).resizeEvent(event)
-
-    def update_row_heights(self):
-        height = self.table_widget.height() // self.table_widget.rowCount() - 16
-        for row in range(self.table_widget.rowCount()):
-            self.table_widget.setRowHeight(row, height)
-
-    def toggle_steps(self):
-        self.flag = not self.flag
-
-    def get_flag(self):
-        return self.flag
-
-    def solve(self, fun, flag=True, manhattan=True):
-        print("hi")
-        start = self.read_table_input()
-        if not main.is_solvable(start):
-            self.show_error("Non Solvable")
-            return
-        else:
-            self.hide_error()
-        start_time = time.time()
-        if flag:
-            ans = fun(start)
-        else:
-            ans = fun(start, manhattan)
-        print(ans)
-        end_time = time.time()
-        exec_time = end_time - start_time
-        print("Finished in:", round(exec_time * 1e3, 4), "ms")
-        if flag:
-            trace = main.get_path(ans[0])
-        else:
-            trace = main.get_path_A(ans[0])
-        trace.reverse()
-        self.step_display_window.show()
-        self.step_display_window.show_steps(self, str(len(trace)-1), str(ans[1]), str(ans[2]), str(round(exec_time * 1e3, 5)) + " ms", trace)
-        if self.flag:
-            print(trace)
-
-    def method1(self):
-        if self.validate_input():
-            self.solve(main.bfs)
-
-    def method2(self):
-        if self.validate_input():
-            self.solve(main.dfs)
-
-    def method3(self):
-        if self.validate_input():
-            self.solve(main.Astar, False)
-
-    def method4(self):
-        if self.validate_input():
-            self.solve(main.Astar, False, False)
-
-    def read_table_input(self):
-        puzzle_input = ""
-        values = set()
-        for row in range(self.table_widget.rowCount()):
-            row_values = ""
-            for col in range(self.table_widget.columnCount()):
-                item = self.table_widget.item(row, col)
-                if item:
-                    value = item.text()
-                    if not value:
-                        value = "0"
-                    value = int(value)
-                    if 0 <= value <= 8 and value not in values:
-                        values.add(value)
-                    else:
-                        return None  # Invalid input
-                    row_values += str(value)
-            puzzle_input += row_values
-        if len(values) == 9:
-            return puzzle_input
-        return None  # Invalid input
-
-    def validate_input(self):
-        puzzle_input = self.read_table_input()
-        if puzzle_input is not None:
-            return True
-        else:
-            self.show_error("Invalid input. Make sure values are distinct integers from 1 to 8 with one empty cell.")
-            return False
-
-    def show_error(self, message):
-        self.error_label.setText(message)
-        self.error_label.show()
-
-    def hide_error(self):
-        self.error_label.hide()
-
-    def create_styled_button(self, text, checkable=False):
+    def create_styled_button(self, text):
         button = QPushButton(text)
         button.setStyleSheet("""
             QPushButton {
@@ -222,9 +128,8 @@ class PuzzleApp(QWidget):
                 background-color: #e74c3c;
             }
         """)
-        if checkable:
-            button.setCheckable(True)
         return button
+
     def create_off_button(self, text, checkable=False):
         button = QPushButton(text)
         button.setStyleSheet("""
@@ -250,89 +155,108 @@ class PuzzleApp(QWidget):
             button.setCheckable(True)
         return button
 
+    def custom_resize_event(self, event):
+        self.update_row_heights()
+        super(PuzzleApp, self).resizeEvent(event)
 
-class StepDisplayWindow(QWidget):
-    def __init__(self, win):
-        super().__init__()
-        self.wn = win
-        self.setWindowTitle("Step Display")
-        self.setGeometry(100, 100, 400, 300)
+    def update_row_heights(self):
+        height = self.table_widget.height() // self.table_widget.rowCount() - 10
+        for row in range(self.table_widget.rowCount()):
+            self.table_widget.setRowHeight(row, height)
 
-        self.label1 = QLabel()
-        self.label1.setStyleSheet("QLabel { color: red; font-weight: bold; font-size: 16px}")
-        self.label1.hide()
-        self.label2 = QLabel()
-        self.label2.setStyleSheet("QLabel { color: red; font-weight: bold; font-size: 16px}")
-        self.label2.hide()
-        self.label3 = QLabel()
-        self.label3.setStyleSheet("QLabel { color: red; font-weight: bold; font-size: 16px}")
-        self.label3.hide()
-        self.label4 = QLabel()
-        self.label4.setStyleSheet("QLabel { color: red; font-weight: bold; font-size: 16px}")
-        self.label4.hide()
+    def toggle_steps(self):
+        self.flag = not self.flag
 
-        # if PuzzleApp.flag:
-        self.step_table = QTableWidget(3, 3)
-        self.step_table.verticalHeader().setVisible(False)
-        self.step_table.horizontalHeader().setVisible(False)
-        self.step_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        self.step_table.hide()
+    def get_flag(self):
+        return self.flag
 
-        self.prev_button = QPushButton("Previous")
-        self.next_button = QPushButton("Next")
-        self.prev_button.clicked.connect(self.show_previous_step)
-        self.next_button.clicked.connect(self.show_next_step)
-
-        button_layout = QHBoxLayout()
-        button_layout.addWidget(self.prev_button)
-        button_layout.addWidget(self.next_button)
-
-        main_layout = QVBoxLayout()
-        main_layout.addWidget(self.label1)
-        main_layout.addWidget(self.label2)
-        main_layout.addWidget(self.label3)
-        main_layout.addWidget(self.label4)
-        main_layout.addWidget(self.step_table)
-        main_layout.addLayout(button_layout)
-        self.setLayout(main_layout)
-
-        self.current_step = 0
-        self.steps = []
-
-    def show_steps(self, win, data1, data2, data3, data4, steps):
-        self.label1.setText("Cost: " + data1)
-        self.label1.show()
-        self.label2.setText("Nodes Expanded: " + data2)
-        self.label2.show()
-        self.label3.setText("Search Depth: " + data3)
-        self.label3.show()
-        self.label4.setText("Running Time: " + data4)
-        self.label4.show()
-        if win.get_flag():
-            self.step_table.show()
-            self.current_step = 0
-            self.steps = steps
-            self.show_current_step()
+    def solve(self, fun, flag=True, manhattan=True):
+        start = self.read_table_input()
+        if not main.is_solvable(start):
+            self.show_error("Non Solvable")
+            return
         else:
-            self.step_table.hide()
+            self.hide_error()
+        start_time = time.time()
+        if flag:
+            ans = fun(start)
+        else:
+            ans = fun(start, manhattan)
+        print(ans)
+        end_time = time.time()
+        exec_time = end_time - start_time
+        print("Finished in:", round(exec_time * 1e3, 4), "ms")
+        if flag:
+            trace = main.get_path(ans[0])
+        else:
+            trace = main.get_path_A(ans[0])
+        trace.reverse()
+        self.step_display_window.show()
+        self.step_display_window.show_steps(self, str(len(trace) - 1), str(ans[1]), str(ans[2]),
+                                            str(round(exec_time * 1e3, 5)) + " ms", trace)
+        if self.flag:
+            print(trace)
 
-    def show_current_step(self):
-        if self.current_step < len(self.steps):
-            step = self.steps[self.current_step]
-            for i in range(9):
-                val = "" if step[i] == '0' else step[i]
-                item = QTableWidgetItem(val)
-                self.step_table.setItem(i // 3, i % 3, item)
+    def method1(self):
+        if self.validate_input():
+            self.solve(main.bfs)
 
-    def show_previous_step(self):
-        if self.current_step > 0:
-            self.current_step -= 1
-            self.show_current_step()
+    def method2(self):
+        if self.validate_input():
+            self.solve(main.dfs)
 
-    def show_next_step(self):
-        if self.current_step < len(self.steps) - 1:
-            self.current_step += 1
-            self.show_current_step()
+    def method3(self):
+        if self.validate_input():
+            self.solve(main.Astar, False)
+
+    def method4(self):
+        if self.validate_input():
+            self.solve(main.Astar, False, False)
+
+    def read_table_input(self):
+        puzzle_input = ""
+        blank = False
+        values = set()
+        for row in range(self.table_widget.rowCount()):
+            row_values = ""
+            for col in range(self.table_widget.columnCount()):
+                item = self.table_widget.item(row, col)
+                if item:
+                    value = item.text()
+                    if not value:
+                        if not blank:
+                            blank = True
+                            row_values += "0"
+                        else:
+                            return None
+                    elif value.isdigit():
+                        value = int(value)
+                        if 1 <= value <= 8 and value not in values:
+                            values.add(value)
+                        else:
+                            return None  # Invalid input
+                    else:
+                        return None
+                    row_values += str(value)
+            puzzle_input += row_values
+        if len(puzzle_input) == 9 and blank:
+            return puzzle_input
+        return None  # Invalid input
+
+    def validate_input(self):
+        puzzle_input = self.read_table_input()
+        if puzzle_input is not None:
+            return True
+        else:
+            self.show_error("Invalid input. Make sure values are distinct integers from 1 to 8 with one empty cell.")
+            return False
+
+    def show_error(self, message):
+        self.error_label.setText(message)
+        self.error_label.show()
+
+    def hide_error(self):
+        self.error_label.hide()
 
 
 if __name__ == '__main__':

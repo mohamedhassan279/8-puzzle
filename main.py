@@ -158,19 +158,19 @@ def heuristic_euclidean(state):
     return sum
 
 
-def main():
-    start = "120534678"
-    if not is_solvable(start):
-        print("Non Solvable")
-        return
-    start_time = time.time()
-    ans = Astar(start, False)
-    end_time = time.time()
-    exec_time = end_time - start_time
-    print("Finished in:", round(exec_time * 1e3, 4), "ms")
-    trace = get_path(ans)
-    print(trace[-1::-1])
-
-
-if __name__ == "__main__":
-    main()
+# def main():
+#     start = "120534678"
+#     if not is_solvable(start):
+#         print("Non Solvable")
+#         return
+#     start_time = time.time()
+#     ans = Astar(start, False)
+#     end_time = time.time()
+#     exec_time = end_time - start_time
+#     print("Finished in:", round(exec_time * 1e3, 4), "ms")
+#     trace = get_path(ans)
+#     print(trace[-1::-1])
+#
+#
+# if __name__ == "__main__":
+#     main()
