@@ -24,6 +24,7 @@ def get_path(parent):
     final_path.append(curr)
     return final_path
 
+
 def get_path_A(parent):
     final_path = []
     curr = goal
@@ -90,7 +91,7 @@ def dfs(start):
         search_depth = max(search_depth, level[curr])
         explored.add(curr)
         if curr == goal:
-            return (parent, len(explored), search_depth)
+            return parent, len(explored), search_depth
         for neighbour in get_neighbor(curr):
             if neighbour not in parent:
                 frontier.append(neighbour)
@@ -104,7 +105,8 @@ def Astar(initial_state, is_manhattan):
     level = dict()
 
     explored = set()
-    heapq.heappush(pq, (heuristic_manhattan(initial_state) if is_manhattan else heuristic_euclidean(initial_state), initial_state))
+    heapq.heappush(pq, (
+        heuristic_manhattan(initial_state) if is_manhattan else heuristic_euclidean(initial_state), initial_state))
     parent[initial_state] = (initial_state, 0)
     search_depth = level[initial_state] = 0
 
@@ -116,7 +118,7 @@ def Astar(initial_state, is_manhattan):
         search_depth = max(search_depth, level[curr])
         explored.add(curr)
         if curr == goal:  # success
-            return (parent, len(explored), search_depth)
+            return parent, len(explored), search_depth
         for neighbor in get_neighbor(curr):
             new_cost = cost + 1
             total_cost = new_cost + (heuristic_manhattan(neighbor) if is_manhattan else heuristic_euclidean(neighbor))
@@ -140,7 +142,7 @@ def heuristic_manhattan(state):
         if state[i] == ' ':
             sum = sum + abs(0 - x_ind) + abs(0 - y_ind)
         else:
-            sum = sum + abs(int(state[i])//3 - x_ind) + abs(int(state[i]) % 3 - y_ind)
+            sum = sum + abs(int(state[i]) // 3 - x_ind) + abs(int(state[i]) % 3 - y_ind)
     return sum
 
 
@@ -152,7 +154,7 @@ def heuristic_euclidean(state):
         if state[i] == ' ':
             sum = sum + math.sqrt(((0 - x_ind) ** 2 + (0 - y_ind) ** 2))
         else:
-            sum = sum + math.sqrt(((int(state[i])//3 - x_ind) ** 2 + (int(state[i]) % 3 - y_ind) ** 2))
+            sum = sum + math.sqrt(((int(state[i]) // 3 - x_ind) ** 2 + (int(state[i]) % 3 - y_ind) ** 2))
     return sum
 
 
