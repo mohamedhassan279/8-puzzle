@@ -182,7 +182,6 @@ class PuzzleApp(QWidget):
             ans = fun(start)
         else:
             ans = fun(start, manhattan)
-        print(ans)
         end_time = time.time()
         exec_time = end_time - start_time
         print("Finished in:", round(exec_time * 1e3, 4), "ms")
