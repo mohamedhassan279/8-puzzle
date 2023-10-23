@@ -32,7 +32,7 @@ def get_neighbor(state):
             zero_pos = i
             break
     row, col = zero_pos // 3, zero_pos % 3
-    neighbours = [[row + 1, col], [row - 1, col], [row, col + 1], [row, col - 1]]
+    neighbours = [[row - 1, col], [row + 1, col], [row, col - 1], [row, col + 1]]
     for elem in neighbours:
         if 0 <= elem[0] <= 2 and 0 <= elem[1] <= 2:
             pos = elem[0] * 3 + elem[1]
@@ -79,7 +79,7 @@ def dfs(start):
         explored.add(curr)
         if curr == goal:
             return parent, len(explored), search_depth
-        for neighbour in get_neighbor(curr):
+        for neighbour in reversed(get_neighbor(curr)):
             if neighbour not in parent:
                 frontier.append(neighbour)
                 parent[neighbour] = (curr, curr_level + 1)
