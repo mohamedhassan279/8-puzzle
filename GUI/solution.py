@@ -29,6 +29,7 @@ class StepDisplayWindow(QWidget):
         self.step_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.step_table.verticalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.step_table.setSelectionMode(QAbstractItemView.NoSelection)
+        self.step_table.setEditTriggers(QTableWidget.NoEditTriggers)
 
         font = QFont()
         font.setPointSize(12)
