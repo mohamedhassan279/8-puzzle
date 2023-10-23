@@ -5,7 +5,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
-import main
+import agent
 from GUI.solution import StepDisplayWindow
 
 
@@ -170,9 +170,9 @@ class PuzzleApp(QWidget):
     def get_flag(self):
         return self.flag
 
-    def solve(self, fun, flag=True, manhattan=True):
+    def solve(self, fun, flag=True, heuristic=agent.heuristic_manhattan):
         start = self.read_table_input()
-        if not main.is_solvable(start):
+        if not agent.is_solvable(start):
             self.show_error("Non Solvable")
             return
         else:
@@ -181,14 +181,11 @@ class PuzzleApp(QWidget):
         if flag:
             ans = fun(start)
         else:
-            ans = fun(start, manhattan)
+            ans = fun(start, heuristic)
         end_time = time.time()
         exec_time = end_time - start_time
         print("Finished in:", round(exec_time * 1e3, 4), "ms")
-        if flag:
-            trace = main.get_path(ans[0])
-        else:
-            trace = main.get_path_A(ans[0])
+        trace = agent.get_path(ans[0])
         trace.reverse()
         self.step_display_window.show()
         self.step_display_window.show_steps(self, str(len(trace) - 1), str(ans[1]), str(ans[2]),
@@ -198,19 +195,19 @@ class PuzzleApp(QWidget):
 
     def method1(self):
         if self.validate_input():
-            self.solve(main.bfs)
+            self.solve(agent.bfs)
 
     def method2(self):
         if self.validate_input():
-            self.solve(main.dfs)
+            self.solve(agent.dfs)
 
     def method3(self):
         if self.validate_input():
-            self.solve(main.Astar, False)
+            self.solve(agent.a_star, False)
 
     def method4(self):
         if self.validate_input():
-            self.solve(main.Astar, False, False)
+            self.solve(agent.a_star, False, agent.heuristic_euclidean)
 
     def read_table_input(self):
         puzzle_input = ""
